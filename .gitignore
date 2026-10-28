@@ -18,3 +18,6 @@ results/llm_cache.jsonl
 results/baseline_predictions.csv
 
 .DS_Store
+
+# local run artefacts
+demo_log.txt
