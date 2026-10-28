@@ -3,8 +3,17 @@ REM Windows one-click setup: creates .venv, installs requirements, runs the offl
 cd /d "%~dp0"
 echo === Bank Complaint Classifier: setup + demo === > demo_log.txt
 
+REM pandas/scikit-learn wheels lag behind brand-new Python releases, so prefer 3.13.
 set PY=
-py -3 --version >nul 2>&1 && set PY=py -3
+py -V:3.13 --version >nul 2>&1 && set PY=py -V:3.13
+if not defined PY (
+  py --version >nul 2>&1 && (
+    echo Installing Python 3.13 for this project...
+    py install 3.13 >> demo_log.txt 2>&1
+    py -V:3.13 --version >nul 2>&1 && set PY=py -V:3.13
+  )
+)
+if not defined PY py -3 --version >nul 2>&1 && set PY=py -3
 if not defined PY python --version >nul 2>&1 && set PY=python
 if not defined PY (
   echo PYTHON_NOT_FOUND >> demo_log.txt
