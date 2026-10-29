@@ -82,12 +82,14 @@ class LLMClassifier:
         model: str = GEMINI_MODEL,
         requests_per_minute: int = REQUESTS_PER_MINUTE,
         cache_path: Path | None = CACHE_PATH,
+        max_retries: int = MAX_RETRIES,
     ) -> None:
         if provider not in {"gemini", "mock"}:
             raise ValueError(f"unknown provider: {provider}")
         self.provider = provider
         self.model = model if provider == "gemini" else "keyword-rules"
         self.min_interval = 60.0 / max(requests_per_minute, 1)
+        self.max_retries = max_retries
         self._last_call = 0.0
         self.cache_path = cache_path
         self.cache = self._load_cache()
@@ -98,7 +100,10 @@ class LLMClassifier:
                 raise RuntimeError("GEMINI_API_KEY is not set. Copy .env.example to .env and add your key.")
             from google import genai  # imported here so tests and mock mode need no SDK
 
-            self._client = genai.Client(api_key=api_key)
+            from google.genai import types
+
+            # 90 s per request; without a timeout a stuck request can hang the whole batch.
+            self._client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=90_000))
 
     # ---- cache -------------------------------------------------------------
     def _cache_key(self, text: str) -> str:
@@ -171,7 +176,7 @@ class LLMClassifier:
             response_schema=ComplaintLabel,
             temperature=0.0,  # same input -> same answer, which makes evaluation repeatable
         )
-        for attempt in range(MAX_RETRIES):
+        for attempt in range(self.max_retries):
             self._wait_for_rate_limit()
             try:
                 response = self._client.models.generate_content(
@@ -179,9 +184,13 @@ class LLMClassifier:
                 )
                 return response.parsed or ComplaintLabel.model_validate_json(response.text)
             except errors.APIError as exc:
-                if exc.code not in RETRYABLE_CODES or attempt == MAX_RETRIES - 1:
+                retryable = exc.code in RETRYABLE_CODES and attempt < self.max_retries - 1
+                wait = min(60, 5 * 2**attempt)
+                message = " ".join(str(getattr(exc, "message", "") or exc).split())[:300]
+                print(f"    Gemini error {exc.code}: {message}" + (f" -> retrying in {wait} s" if retryable else ""))
+                if not retryable:
                     raise
-                time.sleep(min(60, 5 * 2**attempt))  # back off: 5, 10, 20, 40 s
+                time.sleep(wait)  # back off: 5, 10, 20, 40 s
         raise RuntimeError("unreachable")
 
 

@@ -23,7 +23,7 @@ RANDOM_SEED = 42
 MAX_CHARS = 3000
 
 # Gemini settings come from the environment (.env), never from code.
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-flash-lite-latest")
 REQUESTS_PER_MINUTE = int(os.getenv("REQUESTS_PER_MINUTE", "8"))
 
 # The seven classes the project predicts. "team" is the business routing target:

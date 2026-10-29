@@ -9,6 +9,9 @@ if not exist .venv (
 )
 call .venv\Scripts\activate.bat
 
+REM Flash-Lite answers in seconds; Flash timed out (504) on the free tier. This overrides .env.
+set GEMINI_MODEL=gemini-flash-lite-latest
+
 echo [1/6] Checking the Gemini key...
 python -u scripts\check_gemini.py >> %LOG% 2>&1 || (echo STEP_FAILED check_gemini >> %LOG% & exit /b 1)
 

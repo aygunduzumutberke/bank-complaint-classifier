@@ -54,9 +54,9 @@ def fake_gemini(monkeypatch):
             return SimpleNamespace(parsed=outcome, text=outcome.model_dump_json())
 
     genai = types.ModuleType("google.genai")
-    genai.Client = lambda api_key: SimpleNamespace(models=Models())
+    genai.Client = lambda api_key, http_options=None: SimpleNamespace(models=Models())
     genai.errors = SimpleNamespace(APIError=FakeAPIError)
-    genai.types = SimpleNamespace(GenerateContentConfig=lambda **kwargs: kwargs)
+    genai.types = SimpleNamespace(GenerateContentConfig=lambda **kwargs: kwargs, HttpOptions=lambda **kwargs: kwargs)
     google = types.ModuleType("google")
     google.genai = genai
     monkeypatch.setitem(sys.modules, "google", google)
