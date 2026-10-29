@@ -78,11 +78,16 @@ streamlit run app.py
 
 **Full run on real data:**
 
-1. Download the CFPB data from the [Consumer Complaint Database](https://www.consumerfinance.gov/data-research/consumer-complaints/) — either the full file ([complaints.csv.zip](https://files.consumerfinance.gov/ccdb/complaints.csv.zip), several GB) or a filtered CSV export (e.g. the last two years, complaints with a narrative). Put it in `data/raw/`.
+1. Get the data. On 14 Aug 2026 the CFPB stopped publishing complaint narratives, so they are downloaded from a public Hugging Face mirror made before that ([`Mouwiya/cfpb-consumer-complaints`](https://huggingface.co/datasets/Mouwiya/cfpb-consumer-complaints), Jan 2025 – Jan 2026). Four ~15 MB shards are enough:
+
+```bash
+python scripts/download_cfpb.py --shards 4
+```
+
 2. Run:
 
 ```bash
-python -m src.prepare_data --input data/raw/complaints.csv.zip --per-class 1500
+python -m src.prepare_data --input data/raw/cfpb_sample.csv --per-class 1500
 python -m src.baseline
 python -m src.evaluate_llm --per-class 30      # 210 LLM calls, ~30 min on the free tier
 python -m src.report
@@ -115,7 +120,9 @@ tests/                  pytest suite
 
 ## Data
 
-[CFPB Consumer Complaint Database](https://www.consumerfinance.gov/data-research/consumer-complaints/), published by the U.S. Consumer Financial Protection Bureau. Consumers' personal information is removed by the CFPB before publication. The raw data is not stored in this repository.
+Complaints filed with the U.S. [Consumer Financial Protection Bureau](https://www.consumerfinance.gov/data-research/consumer-complaints/) between January 2025 and January 2026, taken from the public Hugging Face mirror [`Mouwiya/cfpb-consumer-complaints`](https://huggingface.co/datasets/Mouwiya/cfpb-consumer-complaints). The CFPB removed personal information before publishing and [stopped publishing narratives in August 2026](https://www.consumerfinancemonitor.com/2026/08/18/cfpb-ends-publication-of-consumer-complaint-narratives-and-data-visualizations/). The raw data is not stored in this repository.
+
+On Windows, `run_demo.bat` sets everything up and runs the offline demo; `run_real.bat` runs the full pipeline on real data.
 
 ## License
 
