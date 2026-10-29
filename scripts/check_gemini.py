@@ -25,7 +25,7 @@ def main() -> None:
     if not key:
         sys.exit("GEMINI_KEY_MISSING: .env has no GEMINI_API_KEY value")
     print(f"Key found ({len(key)} characters). Model: {GEMINI_MODEL}")
-    result = LLMClassifier(provider="gemini", cache_path=None, max_retries=1).classify(SAMPLE)
+    result = LLMClassifier(provider="gemini", cache_path=None).classify(SAMPLE)
     print(f"GEMINI_OK category={result['category']} urgency={result['urgency']} "
           f"latency={result['latency_ms']} ms")
     print(f"summary: {result['summary']}")
