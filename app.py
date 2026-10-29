@@ -109,11 +109,13 @@ with tab_single:
                 st.error(f"The model call failed: {exc}")
                 st.stop()
         info = CATEGORIES[result["category"]]
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Category", info["label_en"], help=info["label_tr"])
-        c2.metric("Route to", info["team"])
-        c3.metric("Urgency", URGENCY_LABEL[result["urgency"]])
-        c4.metric("Sentiment", result["sentiment"].replace("_", " "))
+        # Two columns per row so long labels are not cut off on narrow screens.
+        c1, c2 = st.columns(2)
+        c1.markdown(f"**Category**  \n{info['label_en']}")
+        c2.markdown(f"**Route to**  \n{info['team']}")
+        c3, c4 = st.columns(2)
+        c3.markdown(f"**Urgency**  \n{URGENCY_LABEL[result['urgency']]}")
+        c4.markdown(f"**Sentiment**  \n{result['sentiment'].replace('_', ' ')}")
         st.info(result["summary"])
         st.caption(f"{info['label_tr']} · {result['model']} · "
                    f"{'from cache' if result['cached'] else str(result['latency_ms']) + ' ms'}")
@@ -168,10 +170,11 @@ with tab_compare:
         llm, base = comparison["llm"], comparison["baseline"]
         st.write(f"Both models scored on the same **{comparison['n']}** test complaints. "
                  f"LLM: `{llm['model']}` (zero-shot).")
-        c1, c2, c3, c4 = st.columns(4)
+        c1, c2 = st.columns(2)
         c1.metric("LLM accuracy", f"{llm['accuracy']:.1%}",
                   delta=f"{100 * (llm['accuracy'] - base['accuracy']):+.1f} pts vs baseline")
         c2.metric("Baseline accuracy", f"{base['accuracy']:.1%}")
+        c3, c4 = st.columns(2)
         c3.metric("LLM macro F1", f"{llm['macro_f1']:.3f}")
         c4.metric("Baseline macro F1", f"{base['macro_f1']:.3f}")
         st.pyplot(f1_by_category(comparison))
