@@ -26,7 +26,7 @@ from src.config import CATEGORIES, CATEGORY_IDS, GEMINI_MODEL, MAX_CHARS, REQUES
 
 PROMPT_VERSION = "v1"  # bump when the prompt changes, so old cached answers are not reused
 CACHE_PATH = RESULTS_DIR / "llm_cache.jsonl"
-RETRYABLE_CODES = {429, 500, 503}
+RETRYABLE_CODES = {429, 500, 503, 504}  # rate limit, server busy, timeout
 MAX_RETRIES = 5
 
 Category = Enum("Category", {c: c for c in CATEGORY_IDS}, type=str)
@@ -102,8 +102,8 @@ class LLMClassifier:
 
             from google.genai import types
 
-            # 90 s per request; without a timeout a stuck request can hang the whole batch.
-            self._client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=90_000))
+            # 180 s per request; without a timeout a stuck request can hang the whole batch.
+            self._client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=180_000))
 
     # ---- cache -------------------------------------------------------------
     def _cache_key(self, text: str) -> str:

@@ -23,3 +23,4 @@ results/baseline_predictions.csv
 demo_log.txt
 real_run_log.txt
 gemini_check_log.txt
+finish_log.txt
