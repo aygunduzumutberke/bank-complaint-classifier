@@ -1,0 +1,126 @@
+{
+  "n": 1747,
+  "accuracy": 0.8037,
+  "macro_f1": 0.8063,
+  "weighted_f1": 0.8042,
+  "per_class": {
+    "bank_account": {
+      "precision": 0.7157,
+      "recall": 0.73,
+      "f1": 0.7228,
+      "support": 300
+    },
+    "card": {
+      "precision": 0.8201,
+      "recall": 0.7651,
+      "f1": 0.7917,
+      "support": 298
+    },
+    "mortgage": {
+      "precision": 0.9623,
+      "recall": 0.9358,
+      "f1": 0.9488,
+      "support": 218
+    },
+    "consumer_loan": {
+      "precision": 0.8271,
+      "recall": 0.8133,
+      "f1": 0.8202,
+      "support": 300
+    },
+    "money_transfer": {
+      "precision": 0.7675,
+      "recall": 0.7969,
+      "f1": 0.782,
+      "support": 261
+    },
+    "debt_collection": {
+      "precision": 0.8145,
+      "recall": 0.8145,
+      "f1": 0.8145,
+      "support": 248
+    },
+    "credit_reporting": {
+      "precision": 0.7226,
+      "recall": 0.8115,
+      "f1": 0.7645,
+      "support": 122
+    }
+  },
+  "labels": [
+    "bank_account",
+    "card",
+    "mortgage",
+    "consumer_loan",
+    "money_transfer",
+    "debt_collection",
+    "credit_reporting"
+  ],
+  "confusion_matrix": [
+    [
+      219,
+      20,
+      0,
+      6,
+      49,
+      2,
+      4
+    ],
+    [
+      29,
+      228,
+      0,
+      9,
+      11,
+      8,
+      13
+    ],
+    [
+      2,
+      0,
+      204,
+      8,
+      1,
+      1,
+      2
+    ],
+    [
+      10,
+      12,
+      3,
+      244,
+      2,
+      21,
+      8
+    ],
+    [
+      42,
+      7,
+      0,
+      3,
+      208,
+      1,
+      0
+    ],
+    [
+      2,
+      9,
+      4,
+      20,
+      0,
+      202,
+      11
+    ],
+    [
+      2,
+      2,
+      1,
+      5,
+      0,
+      13,
+      99
+    ]
+  ],
+  "train_seconds": 5.85,
+  "ms_per_complaint": 0.142
+}

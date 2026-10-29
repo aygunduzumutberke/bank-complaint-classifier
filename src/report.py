@@ -16,6 +16,12 @@ from src.plots import confusion_heatmap, f1_by_category
 FIG_DIR = RESULTS_DIR / "figures"
 
 
+def _latency(ms: int | None) -> str:
+    if ms is None:
+        return "–"
+    return f"~{ms / 1000:.1f} s" if ms >= 1000 else f"~{ms} ms"
+
+
 def _pct(x: float) -> str:
     return f"{100 * x:.1f}%"
 
@@ -43,7 +49,7 @@ def main() -> None:
         "| Model | Accuracy | Macro F1 | Speed |",
         "| --- | --- | --- | --- |",
         f"| LLM (zero-shot) | {_pct(llm['accuracy'])} | {llm['macro_f1']:.3f} | "
-        f"~{'–' if llm['median_latency_ms'] is None else llm['median_latency_ms']} ms per complaint |",
+        f"{_latency(llm['median_latency_ms'])} per complaint (median) |",
         f"| TF-IDF + Logistic Regression | {_pct(base['accuracy'])} | {base['macro_f1']:.3f} | "
         "< 1 ms per complaint |",
         "",

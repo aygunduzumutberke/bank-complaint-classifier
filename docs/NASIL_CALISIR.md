@@ -105,14 +105,16 @@ sadece gerçek veriyle ürettiğin `results/` dosyalarını yükle.
 Bankalara gelen şikâyetlerin doğru ekibe yönlendirilmesini otomatikleştirmek istedim.
 ABD'nin kamuya açık CFPB veritabanından 7 kategoride dengeli bir örneklem aldım. Klasik
 bir TF-IDF + Logistic Regression modeli eğittim, Gemini'yi ise hiç örnek göstermeden
-kullandım. İkisini aynı test şikâyetlerinde ölçtüm. Sonuç: [rakamlarını buraya koy].
+kullandım. İkisini aynı 210 test şikâyetinde ölçtüm. Klasik model %80,0, LLM %75,2 doğruluk aldı. LLM hiç eğitim verisi görmeden bu seviyeye geldi, Türkçe de çalışıyor ama binlerce kat daha yavaş.
 Streamlit arayüzünde Türkçe şikâyetleri de sınıflandırabiliyor.
 
 **"LLM mi daha iyi, klasik model mi?"**
-Kendi rakamına göre cevapla. Genel çerçeve: Eğitim verisi bolsa klasik model çok ucuz, çok
-hızlı ve doğrulukta yakın olabilir. LLM'in avantajı etiketli veri istememesi, başka dillerde
-de çalışması ve özet ile aciliyet gibi ek bilgiler üretmesi. Gerçek bir bankada ikisini
-birlikte kullanırdım. Klasik model ilk filtre olur, emin olmadığı durumlarda LLM'e sorulur.
+Bu veride klasik model kazandı: %80,0'a %75,2 (macro F1 0,801'e 0,754). Ama tablo tek yönlü
+değil. LLM para transferi, borç tahsilatı ve tüketici kredilerinde daha iyiydi; klasik model
+konut kredisi ve kredi sicilinde. Klasik model 7.000 etiketli örnekle eğitildi ve 1 ms'nin
+altında çalışıyor. LLM hiç örnek görmedi, Türkçe anlıyor, özet ve aciliyet de üretiyor.
+Gerçek bir bankada ikisini birlikte kullanırdım: klasik model ilk filtre, emin olmadığı
+şikâyetlerle Türkçe şikâyetler LLM'e.
 
 **"Neden CFPB, neden Türk verisi değil?"**
 Türkiye'de kamuya açık, etiketli ve lisansı net bir şikâyet veri seti bulamadım. Şikâyet
@@ -120,9 +122,11 @@ sitelerinden izinsiz veri toplamak istemedim. CFPB resmi, ücretsiz ve gerçek �
 etiketleri var, bu da doğruluğu ölçmeyi mümkün kılıyor.
 
 **"Modelin en çok neyi karıştırıyor?"**
-Confusion matrix'e bak ve en büyük köşegen dışı hücreyi anlat. Ör. kart kaynaklı borcun
-tahsilat şikâyeti hem "kart" hem "borç tahsilatı" olabiliyor. Bu bir model hatası olmaktan
-çok, kategorilerin doğal örtüşmesi.
+En büyük hata: 30 mevduat hesabı şikâyetinin 8'ini LLM "kart" dedi. Bunların çoğu banka
+kartı (debit card) itirazları. CFPB banka kartını vadesiz hesap altında sınıflıyor, LLM ise
+günlük anlamla "kart" diyor. Klasik model bu kuralı veriden öğrendi. İkinci örüntü: kredi
+notunu etkileyen kredi ve borç tahsilatı şikâyetlerini LLM "kredi sicili" sandı (7 ve 6 vaka).
+Çözüm önerim: bu iki kuralı prompt'a eklemek ve yeniden ölçmek.
 
 **"Prompt'u nasıl tasarladın?"**
 Her kategorinin kısa tanımını verdim ve karışan durumlar için açık kurallar ekledim: kredi
@@ -148,8 +152,7 @@ yapısını kurardım. Birkaç yüz şikâyeti elle etiketleyip aciliyet tahmini
 
 ## 6. CV'ye nasıl yazılır
 
-Gerçek sonuçları aldıktan sonra rakamları yerleştir:
-
 > **Bank Complaint Classifier (LLM vs. Classical ML)** — Python, Gemini API, scikit-learn, Streamlit
-> - Built a zero-shot LLM classifier with structured JSON output that routes banking complaints to 7 product teams and rates urgency; reached __% accuracy (macro F1 __) on CFPB complaints vs. __% for a TF-IDF + Logistic Regression baseline trained on __k examples.
-> - Added caching, rate limiting with exponential back-off and a Streamlit app for single and batch (Excel) classification, including Turkish complaints.
+> - Built a zero-shot LLM classifier (Gemini, structured JSON output) that routes banking complaints to 7 product teams, rates urgency and summarises them, including Turkish complaints.
+> - Benchmarked it against a TF-IDF + Logistic Regression baseline on 210 real CFPB complaints: 75.2% vs 80.0% accuracy; error analysis traced the gap to label conventions (e.g. debit-card disputes) and proposed a hybrid routing design.
+> - Added caching, rate limiting with retries and a Streamlit app for single and batch (Excel) classification.

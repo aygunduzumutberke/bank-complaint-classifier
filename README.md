@@ -18,8 +18,27 @@ classical model cannot?
 
 ## Results
 
-The evaluation writes its tables and charts to [`results/RESULTS.md`](results/RESULTS.md).
-Run the pipeline below to (re)create them.
+**The classical model trained on ~7,000 complaints beat the zero-shot LLM: 80.0% vs 75.2% accuracy** on the same 210 real CFPB complaints (30 per category). The LLM needed no training data, works in Turkish, and adds urgency and a summary, but it is thousands of times slower.
+
+| Model | Accuracy | Macro F1 | Training data | Speed (median) |
+| --- | --- | --- | --- | --- |
+| TF-IDF + Logistic Regression | 80.0% | 0.801 | 6,988 labelled complaints | < 1 ms per complaint |
+| Gemini Flash-Lite, zero-shot | 75.2% | 0.754 | none | ~15.5 s per complaint* |
+
+\*Free tier on a day of heavy load, including 503/504 retries; a test call outside the busy period took ~8 s.
+
+![F1 by category](results/figures/f1_by_category.png)
+
+**What the errors show** (full tables and confusion matrices in [`results/RESULTS.md`](results/RESULTS.md)):
+
+- **Debit-card disputes.** 8 of 30 bank-account complaints were labelled "card" by the LLM. CFPB files debit cards under checking accounts; the LLM follows everyday meaning. The trained model learned CFPB's convention from the data.
+- **"Credit reporting" pulls in neighbours.** Loan and debt-collection complaints that mention damage to a credit report were often called credit reporting (7 and 6 cases).
+- **The LLM wins where wording varies most:** money transfer, debt collection and consumer loans. The baseline wins on categories with a fixed vocabulary (mortgage, credit reporting).
+- Both models were wrong on the same 30 complaints, many of which genuinely touch two products.
+
+**Next step:** add the two labelling rules above to the prompt (debit card → bank account; credit-report damage from a loan → the loan), or combine the models: the fast classical model first, the LLM only for low-confidence cases and non-English complaints.
+
+Numbers are on 210 complaints, so each LLM figure is precise to about ±6 percentage points.
 
 ## How it works
 
@@ -116,7 +135,7 @@ tests/                  pytest suite
 - CFPB complaints are from US consumers; categories and wording differ from Turkish banking. The Turkish support is the LLM's zero-shot ability and is not measured against labelled Turkish data.
 - Urgency and sentiment come from the LLM and have no ground-truth labels, so they are not scored.
 - The baseline is English-only.
-- The LLM is evaluated on a few hundred complaints because of free-tier limits; with 210 complaints, an accuracy figure is only precise to about ±5 percentage points.
+- The LLM is evaluated on a few hundred complaints because of free-tier limits; with 210 complaints, an accuracy figure is only precise to about ±6 percentage points.
 
 ## Data
 
